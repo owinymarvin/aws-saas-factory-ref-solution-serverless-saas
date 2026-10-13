@@ -129,6 +129,7 @@ export class ClientInterface extends Construct {
         sources: [
           s3deploy.Source.asset(codeAssetDirectory, {
             assetHashType: cdk.AssetHashType.SOURCE,
+            exclude: ['node_modules', '.angular', 'dist', 'cypress'],
             bundling: {
               image: dockerImage,
               entrypoint: ['bash', '-c'],
