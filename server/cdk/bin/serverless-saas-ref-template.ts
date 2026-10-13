@@ -87,14 +87,8 @@ cdk.Aspects.of(controlPlaneStack).add({
   visit(node) {
     if (node instanceof CfnTable) {
       node.billingMode = 'PAY_PER_REQUEST';
-      node.provisionedThroughput = undefined;
-      const indexes = node.globalSecondaryIndexes;
-      if (Array.isArray(indexes)) {
-        node.globalSecondaryIndexes = indexes.map((index) => ({
-          ...(index as CfnTable.GlobalSecondaryIndexProperty),
-          provisionedThroughput: undefined,
-        }));
-      }
+      node.addPropertyDeletionOverride('ProvisionedThroughput');
+      node.addPropertyDeletionOverride('GlobalSecondaryIndexes.0.ProvisionedThroughput');
     }
   },
 });
