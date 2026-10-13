@@ -51,7 +51,7 @@ export class ClientInterface extends Construct {
           ],
           defaultRootObject: "index.html",
           httpVersion: aws_cloudfront.HttpVersion.HTTP2,
-          priceClass: aws_cloudfront.PriceClass.PRICE_CLASS_ALL,
+          priceClass: aws_cloudfront.PriceClass.PRICE_CLASS_100,
           errorConfigurations: [
             {
               errorCode: 403,
@@ -137,7 +137,7 @@ export class ClientInterface extends Construct {
               command: [
                 [
                   'pwd',
-                  'yarn install',
+                  'CYPRESS_INSTALL_BINARY=0 yarn install',
                   `echo 'export const environment = ${JSON.stringify(
                     siteConfig
                   )}' > ./src/environments/environment.prod.ts`,
