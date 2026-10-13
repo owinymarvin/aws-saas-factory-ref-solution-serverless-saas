@@ -38,9 +38,7 @@ export class Microservice extends Construct {
     this.idResource = props.apiGatewayResource.addResource('{id}');
 
     this.table = new aws_dynamodb.Table(this, 'Table', {
-      billingMode: aws_dynamodb.BillingMode.PROVISIONED,
-      readCapacity: 5,
-      writeCapacity: 5,
+      billingMode: aws_dynamodb.BillingMode.PAY_PER_REQUEST,
       partitionKey: {
         name: 'shardId',
         type: aws_dynamodb.AttributeType.STRING,

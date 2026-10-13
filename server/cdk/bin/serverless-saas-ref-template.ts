@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 import * as cdk from 'aws-cdk-lib';
+import { CfnTable } from 'aws-cdk-lib/aws-dynamodb';
 import { TenantTemplateStack } from '../lib/tenant-template/tenant-template-stack';
 import { DestroyPolicySetter } from '../lib/cdk-aspect/destroy-policy-setter';
 import { BootstrapTemplateStack } from '../lib/bootstrap-template/bootstrap-template-stack';
-import { ServerlessSaaSPipeline } from '../lib/tenant-pipeline/serverless-saas-pipeline';
 import { getEnv } from '../lib/helper-functions';
 import { ControlPlaneStack } from '../lib/control-plane-stack';
 
@@ -22,8 +22,6 @@ const pooledId = 'pooled';
 
 const systemAdminEmail = process.env.CDK_PARAM_SYSTEM_ADMIN_EMAIL;
 const tenantId = process.env.CDK_PARAM_TENANT_ID || pooledId;
-const s3SourceBucket = getEnv('CDK_PARAM_S3_BUCKET_NAME');
-const sourceZip = getEnv('CDK_SOURCE_NAME');
 const commitId = getEnv('CDK_PARAM_COMMIT_ID');
 
 if (!process.env.CDK_PARAM_IDP_NAME) {
@@ -85,6 +83,22 @@ const controlPlaneStack = new ControlPlaneStack(app, 'ControlPlaneStack', {
   systemAdminEmail: systemAdminEmail,
 });
 
+cdk.Aspects.of(controlPlaneStack).add({
+  visit(node) {
+    if (node instanceof CfnTable) {
+      node.billingMode = 'PAY_PER_REQUEST';
+      node.provisionedThroughput = undefined;
+      const indexes = node.globalSecondaryIndexes;
+      if (Array.isArray(indexes)) {
+        node.globalSecondaryIndexes = indexes.map((index) => ({
+          ...(index as CfnTable.GlobalSecondaryIndexProperty),
+          provisionedThroughput: undefined,
+        }));
+      }
+    }
+  },
+});
+
 const bootstrapTemplateStack = new BootstrapTemplateStack(
   app,
   'serverless-saas-ref-arch-bootstrap-stack',
@@ -119,10 +133,3 @@ tenantTemplateStack.addDependency(bootstrapTemplateStack);
 cdk.Tags.of(tenantTemplateStack).add('TenantId', tenantId);
 cdk.Tags.of(tenantTemplateStack).add('IsPooledDeploy', String(isPooledDeploy));
 cdk.Aspects.of(tenantTemplateStack).add(new DestroyPolicySetter());
-
-const serverlessSaaSPipeline = new ServerlessSaaSPipeline(app, 'ServerlessSaaSPipeline', {
-  tenantMappingTable: bootstrapTemplateStack.tenantMappingTable,
-  s3SourceBucket: s3SourceBucket,
-  sourceZip: sourceZip
-});
-cdk.Aspects.of(serverlessSaaSPipeline).add(new DestroyPolicySetter());

@@ -3,7 +3,7 @@ import { Construct } from 'constructs';
 import { ApiKeySSMParameterNames } from '../interfaces/api-key-ssm-parameter-names';
 import { EventBus } from "aws-cdk-lib/aws-events";
 import { TenantApiKey } from './tenant-api-key';
-import { Table, AttributeType } from 'aws-cdk-lib/aws-dynamodb';
+import { Table, AttributeType, BillingMode } from 'aws-cdk-lib/aws-dynamodb';
 import { PolicyDocument } from 'aws-cdk-lib/aws-iam';
 import { BashJobRunner, BashJobRunnerProps, CoreApplicationPlane, DetailType, EventManager } from '@cdklabs/sbt-aws';
 import * as fs from 'fs';
@@ -32,6 +32,7 @@ export class BootstrapTemplateStack extends Stack {
       eventBus: eventBus,
     });
     this.tenantMappingTable = new Table(this, 'TenantMappingTable', {
+      billingMode: BillingMode.PAY_PER_REQUEST,
       partitionKey: {name: 'tenantId', type: AttributeType.STRING},
     });
 

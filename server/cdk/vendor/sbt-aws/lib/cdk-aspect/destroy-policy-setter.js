@@ -1,0 +1,15 @@
+"use strict";
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.DestroyPolicySetter = void 0;
+const aws_cdk_lib_1 = require("aws-cdk-lib");
+class DestroyPolicySetter {
+    visit(node) {
+        if (node instanceof aws_cdk_lib_1.CfnResource) {
+            node.applyRemovalPolicy(aws_cdk_lib_1.RemovalPolicy.DESTROY);
+        }
+    }
+}
+exports.DestroyPolicySetter = DestroyPolicySetter;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZGVzdHJveS1wb2xpY3ktc2V0dGVyLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vc3JjL2Nkay1hc3BlY3QvZGVzdHJveS1wb2xpY3ktc2V0dGVyLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7QUFBQSxxRUFBcUU7QUFDckUsc0NBQXNDOzs7QUFFdEMsNkNBQWtFO0FBR2xFLE1BQWEsbUJBQW1CO0lBQ3ZCLEtBQUssQ0FBQyxJQUFnQjtRQUMzQixJQUFJLElBQUksWUFBWSx5QkFBVyxFQUFFLENBQUM7WUFDaEMsSUFBSSxDQUFDLGtCQUFrQixDQUFDLDJCQUFhLENBQUMsT0FBTyxDQUFDLENBQUM7UUFDakQsQ0FBQztJQUNILENBQUM7Q0FDRjtBQU5ELGtEQU1DIiwic291cmNlc0NvbnRlbnQiOlsiLy8gQ29weXJpZ2h0IEFtYXpvbi5jb20sIEluYy4gb3IgaXRzIGFmZmlsaWF0ZXMuIEFsbCBSaWdodHMgUmVzZXJ2ZWQuXG4vLyBTUERYLUxpY2Vuc2UtSWRlbnRpZmllcjogQXBhY2hlLTIuMFxuXG5pbXBvcnQgeyBDZm5SZXNvdXJjZSwgSUFzcGVjdCwgUmVtb3ZhbFBvbGljeSB9IGZyb20gJ2F3cy1jZGstbGliJztcbmltcG9ydCB7IElDb25zdHJ1Y3QgfSBmcm9tICdjb25zdHJ1Y3RzJztcblxuZXhwb3J0IGNsYXNzIERlc3Ryb3lQb2xpY3lTZXR0ZXIgaW1wbGVtZW50cyBJQXNwZWN0IHtcbiAgcHVibGljIHZpc2l0KG5vZGU6IElDb25zdHJ1Y3QpOiB2b2lkIHtcbiAgICBpZiAobm9kZSBpbnN0YW5jZW9mIENmblJlc291cmNlKSB7XG4gICAgICBub2RlLmFwcGx5UmVtb3ZhbFBvbGljeShSZW1vdmFsUG9saWN5LkRFU1RST1kpO1xuICAgIH1cbiAgfVxufVxuIl19

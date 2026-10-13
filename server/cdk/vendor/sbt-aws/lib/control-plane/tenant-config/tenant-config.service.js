@@ -1,0 +1,67 @@
+"use strict";
+var _a;
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.TenantConfigService = void 0;
+const JSII_RTTI_SYMBOL_1 = Symbol.for("jsii.rtti");
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+const cdk = require("aws-cdk-lib");
+const apigatewayV2 = require("aws-cdk-lib/aws-apigatewayv2");
+const aws_apigatewayv2_integrations_1 = require("aws-cdk-lib/aws-apigatewayv2-integrations");
+const cdk_nag_1 = require("cdk-nag");
+const constructs_1 = require("constructs");
+const tenant_config_funcs_1 = require("./tenant-config-funcs");
+const utils_1 = require("../../utils");
+/**
+
+Represents the Tenant Config Service construct.
+
+@class TenantConfigService
+
+@extends {Construct}
+
+@param {Construct} scope - The scope in which this construct is defined.
+
+@param {string} id - The construct's identifier.
+
+@param {TenantConfigServiceProps} props - The properties required for the Tenant Config Service.
+
+*/
+class TenantConfigService extends constructs_1.Construct {
+    constructor(scope, id, props) {
+        super(scope, id);
+        const tenantConfigPath = '/tenant-config';
+        const tenantConfigNameResourcePath = `${tenantConfigPath}/{tenantName}`;
+        const tenantConfigLambda = new tenant_config_funcs_1.TenantConfigLambdas(this, 'tenantConfigLambda', {
+            tenantConfigIndexName: props.tenantManagementTable.tenantConfigIndexName,
+            tenantDetails: props.tenantManagementTable.tenantDetails,
+            tenantDetailsTenantConfigColumn: props.tenantManagementTable.tenantConfigColumn,
+            tenantDetailsTenantNameColumn: props.tenantManagementTable.tenantNameColumn,
+        });
+        const tenantConfigServiceHttpLambdaIntegration = new aws_apigatewayv2_integrations_1.HttpLambdaIntegration('tenantConfigServiceHttpLambdaIntegration', tenantConfigLambda.tenantConfigFunction);
+        const routes = [
+            {
+                path: tenantConfigPath,
+                integration: tenantConfigServiceHttpLambdaIntegration,
+                method: apigatewayV2.HttpMethod.GET,
+            },
+            {
+                path: tenantConfigNameResourcePath,
+                integration: tenantConfigServiceHttpLambdaIntegration,
+                method: apigatewayV2.HttpMethod.GET,
+            },
+        ];
+        const tenantConfigRoutes = (0, utils_1.generateRoutes)(props.api, routes);
+        const paths = tenantConfigRoutes.map((r) => r.node.path);
+        cdk_nag_1.NagSuppressions.addResourceSuppressionsByPath(cdk.Stack.of(this), paths, [
+            {
+                id: 'AwsSolutions-APIG4',
+                reason: 'The /tenant-config endpoint is a publicly available endpoint.',
+            },
+        ]);
+    }
+}
+exports.TenantConfigService = TenantConfigService;
+_a = JSII_RTTI_SYMBOL_1;
+TenantConfigService[_a] = { fqn: "@cdklabs/sbt-aws.TenantConfigService", version: "0.3.9" };
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidGVuYW50LWNvbmZpZy5zZXJ2aWNlLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL2NvbnRyb2wtcGxhbmUvdGVuYW50LWNvbmZpZy90ZW5hbnQtY29uZmlnLnNlcnZpY2UudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7QUFBQSxxRUFBcUU7QUFDckUsc0NBQXNDO0FBRXRDLG1DQUFtQztBQUNuQyw2REFBNkQ7QUFDN0QsNkZBQWtGO0FBQ2xGLHFDQUEwQztBQUMxQywyQ0FBdUM7QUFDdkMsK0RBQTREO0FBQzVELHVDQUFxRDtBQWlCckQ7Ozs7Ozs7Ozs7Ozs7O0VBY0U7QUFDRixNQUFhLG1CQUFvQixTQUFRLHNCQUFTO0lBQ2hELFlBQVksS0FBZ0IsRUFBRSxFQUFVLEVBQUUsS0FBK0I7UUFDdkUsS0FBSyxDQUFDLEtBQUssRUFBRSxFQUFFLENBQUMsQ0FBQztRQUVqQixNQUFNLGdCQUFnQixHQUFHLGdCQUFnQixDQUFDO1FBQzFDLE1BQU0sNEJBQTRCLEdBQUcsR0FBRyxnQkFBZ0IsZUFBZSxDQUFDO1FBQ3hFLE1BQU0sa0JBQWtCLEdBQUcsSUFBSSx5Q0FBbUIsQ0FBQyxJQUFJLEVBQUUsb0JBQW9CLEVBQUU7WUFDN0UscUJBQXFCLEVBQUUsS0FBSyxDQUFDLHFCQUFxQixDQUFDLHFCQUFxQjtZQUN4RSxhQUFhLEVBQUUsS0FBSyxDQUFDLHFCQUFxQixDQUFDLGFBQWE7WUFDeEQsK0JBQStCLEVBQUUsS0FBSyxDQUFDLHFCQUFxQixDQUFDLGtCQUFrQjtZQUMvRSw2QkFBNkIsRUFBRSxLQUFLLENBQUMscUJBQXFCLENBQUMsZ0JBQWdCO1NBQzVFLENBQUMsQ0FBQztRQUNILE1BQU0sd0NBQXdDLEdBQUcsSUFBSSxxREFBcUIsQ0FDeEUsMENBQTBDLEVBQzFDLGtCQUFrQixDQUFDLG9CQUFvQixDQUN4QyxDQUFDO1FBQ0YsTUFBTSxNQUFNLEdBQWE7WUFDdkI7Z0JBQ0UsSUFBSSxFQUFFLGdCQUFnQjtnQkFDdEIsV0FBVyxFQUFFLHdDQUF3QztnQkFDckQsTUFBTSxFQUFFLFlBQVksQ0FBQyxVQUFVLENBQUMsR0FBRzthQUNwQztZQUNEO2dCQUNFLElBQUksRUFBRSw0QkFBNEI7Z0JBQ2xDLFdBQVcsRUFBRSx3Q0FBd0M7Z0JBQ3JELE1BQU0sRUFBRSxZQUFZLENBQUMsVUFBVSxDQUFDLEdBQUc7YUFDcEM7U0FDRixDQUFDO1FBQ0YsTUFBTSxrQkFBa0IsR0FBRyxJQUFBLHNCQUFjLEVBQUMsS0FBSyxDQUFDLEdBQUcsRUFBRSxNQUFNLENBQUMsQ0FBQztRQUM3RCxNQUFNLEtBQUssR0FBRyxrQkFBa0IsQ0FBQyxHQUFHLENBQUMsQ0FBQyxDQUFDLEVBQUUsRUFBRSxDQUFDLENBQUMsQ0FBQyxJQUFJLENBQUMsSUFBSSxDQUFDLENBQUM7UUFDekQseUJBQWUsQ0FBQyw2QkFBNkIsQ0FBQyxHQUFHLENBQUMsS0FBSyxDQUFDLEVBQUUsQ0FBQyxJQUFJLENBQUMsRUFBRSxLQUFLLEVBQUU7WUFDdkU7Z0JBQ0UsRUFBRSxFQUFFLG9CQUFvQjtnQkFDeEIsTUFBTSxFQUFFLCtEQUErRDthQUN4RTtTQUNGLENBQUMsQ0FBQztJQUNMLENBQUM7O0FBcENILGtEQXFDQyIsInNvdXJjZXNDb250ZW50IjpbIi8vIENvcHlyaWdodCBBbWF6b24uY29tLCBJbmMuIG9yIGl0cyBhZmZpbGlhdGVzLiBBbGwgUmlnaHRzIFJlc2VydmVkLlxuLy8gU1BEWC1MaWNlbnNlLUlkZW50aWZpZXI6IEFwYWNoZS0yLjBcblxuaW1wb3J0ICogYXMgY2RrIGZyb20gJ2F3cy1jZGstbGliJztcbmltcG9ydCAqIGFzIGFwaWdhdGV3YXlWMiBmcm9tICdhd3MtY2RrLWxpYi9hd3MtYXBpZ2F0ZXdheXYyJztcbmltcG9ydCB7IEh0dHBMYW1iZGFJbnRlZ3JhdGlvbiB9IGZyb20gJ2F3cy1jZGstbGliL2F3cy1hcGlnYXRld2F5djItaW50ZWdyYXRpb25zJztcbmltcG9ydCB7IE5hZ1N1cHByZXNzaW9ucyB9IGZyb20gJ2Nkay1uYWcnO1xuaW1wb3J0IHsgQ29uc3RydWN0IH0gZnJvbSAnY29uc3RydWN0cyc7XG5pbXBvcnQgeyBUZW5hbnRDb25maWdMYW1iZGFzIH0gZnJvbSAnLi90ZW5hbnQtY29uZmlnLWZ1bmNzJztcbmltcG9ydCB7IElSb3V0ZSwgZ2VuZXJhdGVSb3V0ZXMgfSBmcm9tICcuLi8uLi91dGlscyc7XG5pbXBvcnQgeyBUZW5hbnRNYW5hZ2VtZW50VGFibGUgfSBmcm9tICcuLi90ZW5hbnQtbWFuYWdlbWVudC90ZW5hbnQtbWFuYWdlbWVudC50YWJsZSc7XG5cbi8qKlxuXG5SZXByZXNlbnRzIHRoZSBwcm9wZXJ0aWVzIHJlcXVpcmVkIGZvciB0aGUgVGVuYW50IENvbmZpZyBTZXJ2aWNlLlxuXG5AaW50ZXJmYWNlIFRlbmFudENvbmZpZ1NlcnZpY2VQcm9wc1xuXG5AcHJvcGVydHkge2FwaWdhdGV3YXlWMi5IdHRwQXBpfSBhcGkgLSBUaGUgSFRUUCBBUEkgdXNlZCBieSB0aGUgVGVuYW50IENvbmZpZyBTZXJ2aWNlLlxuXG5AcHJvcGVydHkge1RlbmFudE1hbmFnZW1lbnRUYWJsZX0gdGVuYW50TWFuYWdlbWVudFRhYmxlIC0gVGhlIHRhYmxlIHVzZWQgZm9yIFRlbmFudCBNYW5hZ2VtZW50LiAqL1xuZXhwb3J0IGludGVyZmFjZSBUZW5hbnRDb25maWdTZXJ2aWNlUHJvcHMge1xuICByZWFkb25seSBhcGk6IGFwaWdhdGV3YXlWMi5IdHRwQXBpO1xuICByZWFkb25seSB0ZW5hbnRNYW5hZ2VtZW50VGFibGU6IFRlbmFudE1hbmFnZW1lbnRUYWJsZTtcbn1cblxuLyoqXG5cblJlcHJlc2VudHMgdGhlIFRlbmFudCBDb25maWcgU2VydmljZSBjb25zdHJ1Y3QuXG5cbkBjbGFzcyBUZW5hbnRDb25maWdTZXJ2aWNlXG5cbkBleHRlbmRzIHtDb25zdHJ1Y3R9XG5cbkBwYXJhbSB7Q29uc3RydWN0fSBzY29wZSAtIFRoZSBzY29wZSBpbiB3aGljaCB0aGlzIGNvbnN0cnVjdCBpcyBkZWZpbmVkLlxuXG5AcGFyYW0ge3N0cmluZ30gaWQgLSBUaGUgY29uc3RydWN0J3MgaWRlbnRpZmllci5cblxuQHBhcmFtIHtUZW5hbnRDb25maWdTZXJ2aWNlUHJvcHN9IHByb3BzIC0gVGhlIHByb3BlcnRpZXMgcmVxdWlyZWQgZm9yIHRoZSBUZW5hbnQgQ29uZmlnIFNlcnZpY2UuXG5cbiovXG5leHBvcnQgY2xhc3MgVGVuYW50Q29uZmlnU2VydmljZSBleHRlbmRzIENvbnN0cnVjdCB7XG4gIGNvbnN0cnVjdG9yKHNjb3BlOiBDb25zdHJ1Y3QsIGlkOiBzdHJpbmcsIHByb3BzOiBUZW5hbnRDb25maWdTZXJ2aWNlUHJvcHMpIHtcbiAgICBzdXBlcihzY29wZSwgaWQpO1xuXG4gICAgY29uc3QgdGVuYW50Q29uZmlnUGF0aCA9ICcvdGVuYW50LWNvbmZpZyc7XG4gICAgY29uc3QgdGVuYW50Q29uZmlnTmFtZVJlc291cmNlUGF0aCA9IGAke3RlbmFudENvbmZpZ1BhdGh9L3t0ZW5hbnROYW1lfWA7XG4gICAgY29uc3QgdGVuYW50Q29uZmlnTGFtYmRhID0gbmV3IFRlbmFudENvbmZpZ0xhbWJkYXModGhpcywgJ3RlbmFudENvbmZpZ0xhbWJkYScsIHtcbiAgICAgIHRlbmFudENvbmZpZ0luZGV4TmFtZTogcHJvcHMudGVuYW50TWFuYWdlbWVudFRhYmxlLnRlbmFudENvbmZpZ0luZGV4TmFtZSxcbiAgICAgIHRlbmFudERldGFpbHM6IHByb3BzLnRlbmFudE1hbmFnZW1lbnRUYWJsZS50ZW5hbnREZXRhaWxzLFxuICAgICAgdGVuYW50RGV0YWlsc1RlbmFudENvbmZpZ0NvbHVtbjogcHJvcHMudGVuYW50TWFuYWdlbWVudFRhYmxlLnRlbmFudENvbmZpZ0NvbHVtbixcbiAgICAgIHRlbmFudERldGFpbHNUZW5hbnROYW1lQ29sdW1uOiBwcm9wcy50ZW5hbnRNYW5hZ2VtZW50VGFibGUudGVuYW50TmFtZUNvbHVtbixcbiAgICB9KTtcbiAgICBjb25zdCB0ZW5hbnRDb25maWdTZXJ2aWNlSHR0cExhbWJkYUludGVncmF0aW9uID0gbmV3IEh0dHBMYW1iZGFJbnRlZ3JhdGlvbihcbiAgICAgICd0ZW5hbnRDb25maWdTZXJ2aWNlSHR0cExhbWJkYUludGVncmF0aW9uJyxcbiAgICAgIHRlbmFudENvbmZpZ0xhbWJkYS50ZW5hbnRDb25maWdGdW5jdGlvblxuICAgICk7XG4gICAgY29uc3Qgcm91dGVzOiBJUm91dGVbXSA9IFtcbiAgICAgIHtcbiAgICAgICAgcGF0aDogdGVuYW50Q29uZmlnUGF0aCxcbiAgICAgICAgaW50ZWdyYXRpb246IHRlbmFudENvbmZpZ1NlcnZpY2VIdHRwTGFtYmRhSW50ZWdyYXRpb24sXG4gICAgICAgIG1ldGhvZDogYXBpZ2F0ZXdheVYyLkh0dHBNZXRob2QuR0VULFxuICAgICAgfSxcbiAgICAgIHtcbiAgICAgICAgcGF0aDogdGVuYW50Q29uZmlnTmFtZVJlc291cmNlUGF0aCxcbiAgICAgICAgaW50ZWdyYXRpb246IHRlbmFudENvbmZpZ1NlcnZpY2VIdHRwTGFtYmRhSW50ZWdyYXRpb24sXG4gICAgICAgIG1ldGhvZDogYXBpZ2F0ZXdheVYyLkh0dHBNZXRob2QuR0VULFxuICAgICAgfSxcbiAgICBdO1xuICAgIGNvbnN0IHRlbmFudENvbmZpZ1JvdXRlcyA9IGdlbmVyYXRlUm91dGVzKHByb3BzLmFwaSwgcm91dGVzKTtcbiAgICBjb25zdCBwYXRocyA9IHRlbmFudENvbmZpZ1JvdXRlcy5tYXAoKHIpID0+IHIubm9kZS5wYXRoKTtcbiAgICBOYWdTdXBwcmVzc2lvbnMuYWRkUmVzb3VyY2VTdXBwcmVzc2lvbnNCeVBhdGgoY2RrLlN0YWNrLm9mKHRoaXMpLCBwYXRocywgW1xuICAgICAge1xuICAgICAgICBpZDogJ0F3c1NvbHV0aW9ucy1BUElHNCcsXG4gICAgICAgIHJlYXNvbjogJ1RoZSAvdGVuYW50LWNvbmZpZyBlbmRwb2ludCBpcyBhIHB1YmxpY2x5IGF2YWlsYWJsZSBlbmRwb2ludC4nLFxuICAgICAgfSxcbiAgICBdKTtcbiAgfVxufVxuIl19
