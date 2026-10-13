@@ -122,7 +122,7 @@ export class ClientInterface extends Construct {
       );
 
       const dockerImage = cdk.DockerImage.fromRegistry(
-        'public.ecr.aws/docker/library/node:18.17.1-bookworm-slim'
+        'public.ecr.aws/docker/library/node:20-bookworm-slim'
       );
 
       new s3deploy.BucketDeployment(this, 'SiteCodeDeployment' + clientDirectoryName, {
